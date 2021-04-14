@@ -30,31 +30,60 @@ var storage = multer.diskStorage({
     cb(null, "image-" + Date.now() + "." + filetype);
   },
 });
-function validate(req) {
-  const schema = {
-    image: Joi.string().min(5).max(255).required().email(),
-  };
 
-  return Joi.validate(req, schema);
+const uploadImg = multer({ storage: storage }).single("file");
+
+async function createuser(file, user, postType, latitude, logitude) {
+  let post = new Posts({
+    file,
+    user,
+    postType,
+    latitude,
+    logitude,
+  });
+
+  await post.save();
 }
-const uploadImg = multer({ storage: storage }).single("image");
 
-router.post("/imagepost", uploadImg, async (req, res, next) => {
+router.post("/", uploadImg, async (req, res, next) => {
   try {
-    if (!req.image) {
+    const { error } = validate(req.body);
+    if (error) return res.status(400).send(error.details[0].message);
+
+    if (!req.file) {
       const error = new Error("Please choose files");
       error.httpStatusCode = 400;
 
+      console.log(error);
       return next(error);
     }
-    let user = await User.findById(req.body.id);
-
+    let user = await User.findById(req.body.user);
+    console.log(user);
     if (!user) return res.status(400).send("Invalid User");
 
     let post = new Posts(
-      _.pick(req.body, ["body", "user", "latitude", "longitude","postType"])
+      _.pick(req.body, ["user", "body", "postType", "latitude", "longitude"])
     );
+
+    post.image = req.file.path;
+    await post.save();
+
+    res
+      .status(200)
+      .send(
+        _.pick(post, [
+          "user",
+          "postType",
+          "latitude",
+          "longitude",
+          "body",
+          "image"
+          
+        ])
+      );
   } catch (e) {
     return res.status(400).json({ status: 0, message: e.message });
   }
 });
+
+module.exports = router;

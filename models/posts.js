@@ -1,23 +1,33 @@
 const mongoose = require("mongoose");
 const Joi = require("joi");
+const User = require('../models/user');
+
+
 const PostSchema = new mongoose.Schema({
   body: {
     type: String,
     minlength: 10,
     maxlength: 260,
-    default:''
+    default: "",
   },
   createAt: {
     default: Date.now,
     type: Date,
   },
 
-  user:{
-
+  user: {
     type: mongoose.Schema.Types.ObjectId,
-    ref:"User",
+    ref: "User",
     required: true,
+  },
+  isActive: {
+    type: Boolean,
+    default: true,
+  },
 
+  image: {
+    type: String,
+    default: "",
   },
   postType: {
     required: true,
@@ -27,49 +37,48 @@ const PostSchema = new mongoose.Schema({
     {
       type: mongoose.Schema.Types.ObjectId,
       ref: "Comment",
-      default:[]
+      default: [],
     },
   ],
   shares: [
     {
       type: mongoose.Schema.Types.ObjectId,
       ref: "Post",
-      default:[]
+      default: [],
     },
   ],
   tags: [
     {
       type: mongoose.Schema.Types.ObjectId,
       ref: "Tag",
-      default:[]
+      default: [],
     },
   ],
   likes: [
     {
       type: mongoose.Schema.Types.ObjectId,
       ref: "Like",
-      default:[]
+      default: [],
     },
   ],
   dislikes: [
     {
       type: mongoose.Schema.Types.ObjectId,
       ref: "Dislike",
-      default:[]
-      
+      default: [],
     },
   ],
   latitude: {
     type: String,
 
     required: true,
-    default:''
+    default: "",
   },
 
   longitude: {
     type: String,
     required: true,
-    default:''
+    default: "",
   },
 });
 
@@ -79,7 +88,7 @@ function validatePost(post) {
   const schema = {
     body: Joi.string().min(10).max(160).required(),
     postType: Joi.string().min(2).max(20).required(),
-    user:Joi.objectId(),
+    user: Joi.objectId(),
 
     latitude: Joi.string().required(),
     longitude: Joi.string().required(),

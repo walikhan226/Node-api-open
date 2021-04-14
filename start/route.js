@@ -6,6 +6,8 @@ const express = require('express');
 const users = require('../routes/users');
 const auth = require('../routes/auth');
 const uploadimage = require('../routes/uploadimage');
+const createpost= require('../routes/posts');
+const getpost = require ('../routes/getpost');
 //const returns = require('../routes/returns');
 const error = require('../middleware/error');
 
@@ -22,6 +24,8 @@ module.exports = function(app) {
   app.use('/api/users/register', users);
   app.use('/api/users/login', auth);
   app.use('/api/uploadimage',uploadimage);
+  app.use('/api/createpost',createpost);
+  app.use('/api/getpost',getpost);
   //app.use('/api/returns', returns);
   app.use(error);
 }
