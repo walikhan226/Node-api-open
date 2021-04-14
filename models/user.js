@@ -40,17 +40,21 @@ const userSchema = new mongoose.Schema({
 
   latitude: {
     type: String,
-  
-    required: true,
+    default: '',
+
   },
 
   longitude: {
     type: String,
-    required: true,
+    default: '',
+ 
   },
   joining: { type: Date, default: Date.now },
 
-  isAdmin: Boolean,
+  isAdmin: {
+    type:Boolean,
+    default:false
+  },
 });
 
 userSchema.methods.generateAuthToken = function () {

@@ -8,63 +8,51 @@ const { json } = require("express");
 const router = express.Router();
 
 router.post("/", async (req, res) => {
-  const { error } = validate(req.body);
-
-  if (error) {
-    return res.status(400).send(
-      
-      json({
-        status: 0,
-        message: "Invalid email/password",
-      })
-      
-      
-      );
-  }
-
-  let user = await User.findOne({ email: req.body.email });
-  if (!user) {
-    return res.status(400).send(
-      res.json({
-        status: 0,
-        message: "User does not exists",
-      })
-    );
-  }
-
+  let user;
   try {
+    const { error } = validate(req.body);
+
+    if (error) {
+      return res.status(200).json({
+        status:0,
+        message:  'Invalid email/password'
+      });
+    }
+
+    user = await User.findOne({ email: req.body.email });
+    if (!user) {
+      return res.status(200).json({
+        status: 0,
+        message:  'User does not exist'
+      });
+    }
     const validpassword = await bcrypt.compare(
       req.body.password,
       user.password
     );
     if (!validpassword) {
-      return res.status(400).send(
-        json({
-          status: 0,
-          message: "Invalid email/password",
-        })
-      );
+      return res.status(400).send("Invalid password");
     }
   } catch (ex) {
-    return res.status(400).send(
-      json({
-        status: 0,
-        message: "Invalid email/password",
-      })
-    );
+    return res.status(400).send("not here");
   }
 
-  const token = user.generateAuthToken();
-  res.send(
-    json({
+  try {
+    const token = user.generateAuthToken();
+
+    console.log(token);
+    return res.status(200).json({
       status: 1,
-      token: token,
+      id: user._id,
+      token:  token,
       username:user.username,
-      useremail:user.email,
-      latitude:user.latitude,
-      longitude:user.longitude,
-    })
-  );
+      image :user.image
+
+    });
+  } catch (e) {
+    console.log("here");
+    return res.status(400).send("here");
+  }
 });
 
 function validate(req) {
