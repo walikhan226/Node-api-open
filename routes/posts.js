@@ -9,7 +9,7 @@ const multer = require("multer");
 const object = require("joi/lib/types/object");
 const router = express.Router();
 const { Posts, validate } = require("../models/posts");
-
+const auth = require("../middleware/auth");
 var storage = multer.diskStorage({
   destination: (req, file, cb) => {
     console.log(file);
@@ -45,7 +45,7 @@ async function createuser(file, user, postType, latitude, logitude) {
   await post.save();
 }
 
-router.post("/", uploadImg, async (req, res, next) => {
+router.post("/",auth, uploadImg, async (req, res, next) => {
   try {
     const { error } = validate(req.body);
     if (error) return res.status(400).send(error.details[0].message);
