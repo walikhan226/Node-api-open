@@ -1,26 +1,27 @@
-var mongoose = require("mongoose");
+// var mongoose = require("mongoose");
 
-var LikeSchema = new mongoose.Schema({
-  likeBy: [
-    {
-      type: mongoose.Schema.Types.ObjectId,
-      ref: "User",
-    },
-  ],
-  score: Number,
-});
+// var LikeSchema = new mongoose.Schema({
+//   likeBy: [
+//     {
+//       unique: true,
+//       type: mongoose.Schema.Types.ObjectId,
+//       ref: "User",
+//     },
+//   ],
+//   score: Number,
+// });
 
-const Likes = mongoose.model("Likes", userSchema);
+// const Likes = mongoose.model("Like", LikeSchema);
 
-function validatelikes(like) {
-  const schema = {
-    likeBy: Joi.objectId(),
-  };
+// function validatelikes(like) {
+//   const schema = {
+//     likeBy: Joi.objectId(),
+//   };
 
-  //const validation = schema.validate(user);
+//   //const validation = schema.validate(user);
 
-  return Joi.validate(like, schema);
-}
+//   return Joi.validate(like, schema);
+// }
 
-exports.Likes = Likes;
-exports.validate = validatelikes;
+// exports.Likes = Likes;
+// exports.validate = validatelikes;

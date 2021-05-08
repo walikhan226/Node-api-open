@@ -57,14 +57,14 @@ const PostSchema = new mongoose.Schema({
   likes: [
     {
       type: mongoose.Schema.Types.ObjectId,
-      ref: "Like",
+      ref: "User",
       default: [],
     },
   ],
   dislikes: [
     {
       type: mongoose.Schema.Types.ObjectId,
-      ref: "Dislike",
+      ref: "User",
       default: [],
     },
   ],

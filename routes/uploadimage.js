@@ -42,6 +42,9 @@ function validate(req) {
 const uploadImg = multer({ storage: storage }).single("file");
 
 router.post("/", uploadImg, async (req, res, next) => {
+
+
+  console.log(req.body.id);
   try {
 
     if (!req.file) {
