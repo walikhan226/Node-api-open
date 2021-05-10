@@ -88,7 +88,7 @@ function validatePost(post) {
   const schema = {
     body: Joi.string().min(10).max(160).required(),
     postType: Joi.string().min(2).max(20).required(),
-    user: Joi.objectId(),
+    user: Joi.objectId().required(),
 
     latitude: Joi.string().required(),
     longitude: Joi.string().required(),

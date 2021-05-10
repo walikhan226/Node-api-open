@@ -9,6 +9,7 @@ const uploadimage = require('../routes/uploadimage');
 const createpost= require('../routes/posts');
 const getpost = require ('../routes/getpost');
 const likepost = require ('../routes/like');
+const dislikepost = require ('../routes/dislike');
 //const returns = require('../routes/returns');
 const error = require('../middleware/error');
 
@@ -28,6 +29,7 @@ module.exports = function(app) {
   app.use('/api/createpost',createpost);
   app.use('/api/getpost',getpost);
   app.use('/api/like',likepost);
+  app.use('/api/dislike',dislikepost);
   //app.use('/api/returns', returns);
   app.use(error);
 }

@@ -13,24 +13,17 @@ router.post("/", async (req, res) => {
   console.log(req.body.userid);
   console.log(req.body.userid);
   try {
-    // const error1  = validateuserid(req.body.userid);
+   
+    const  {error}  = validateinfo(req.body);
 
-    // if (error1) {
-    //   console.log(error1);
-    //   return res.status(200).json({
-    //     status: 0,
-    //     message: "Invalid Params {user id}",
-    //   });
-    // }
+    if (error) {
+      return res.status(200).json({
+        status: 0,
+        message: error.message,
+      });
+    }
 
-    // const  error  = validatepostid(req.body.postId);
 
-    // if (error) {
-    //   return res.status(200).json({
-    //     status: 0,
-    //     message: "Invalid Params {post id}",
-    //   });
-    // }
 
     let user = await User.findOne({ _id: req.body.userid });
     if (!user) {
@@ -76,18 +69,78 @@ router.post("/", async (req, res) => {
   }
 });
 
-function validatepostid(postid) {
+
+router.post("/unlike", async (req, res) => {
+  console.log(req.body.userid);
+  console.log(req.body.userid);
+  try {
+   
+    const  {error}  = validateinfo(req.body);
+
+    if (error) {
+      return res.status(200).json({
+        status: 0,
+        message: error.message,
+      });
+    }
+
+
+
+    let user = await User.findOne({ _id: req.body.userid });
+    if (!user) {
+      return res.status(200).json({
+        status: 0,
+        message: "User does not exist ",
+      });
+    } else {
+      console.log(user);
+    }
+
+    let post = await Posts.findOne({ _id: req.body.postid });
+
+    if (!post) {
+      return res
+        .status(400)
+        .json({ status: 0, message: "Post does not exist" });
+    }
+    if (!post.likes.includes(req.body.userid)) {
+
+      return res
+      .status(400)
+      .json({ status: 0, message: "Like the post first to unlike" });
+    
+    }
+
+    await post.update({
+      $pull: { likes: req.body.userid },
+    });
+    post.save();
+
+    return res.status(400).json({
+      status: 1,
+      message: "sucess",
+
+      post: post,
+    });
+
+    //   return res.status(400).json({ status: 1, message: "sucess" });
+  } catch (e) {
+    //  console.log(e);
+    return res.status(400).json({ status: 0, message: e.message });
+  }
+});
+
+
+
+
+function validateinfo(post) {
   const schema = {
     postid: Joi.objectId().required(),
-  };
-  return Joi.validate(postid, schema);
-}
-
-function validateuserid(userid) {
-  const schema = {
     userid: Joi.objectId().required(),
   };
-  return Joi.validate(userid, schema);
+  return Joi.validate(post, schema);
 }
+
+
 
 module.exports = router;
