@@ -10,19 +10,16 @@ const createpost= require('../routes/posts');
 const getpost = require ('../routes/getpost');
 const likepost = require ('../routes/like');
 const dislikepost = require ('../routes/dislike');
+const deletepost = require('../routes/deletepost');
+const commentspost = require('../routes/comment');
+
+
 //const returns = require('../routes/returns');
 const error = require('../middleware/error');
 
 module.exports = function(app) {
-  //app.use(express.static('uploads/'));
   app.use('/uploads', express.static('uploads/'));
-
   app.use(express.json());
-
-  //app.use('/api/genres', genres);
- // app.use('/api/customers', customers);
-  //app.use('/api/movies', movies);
-  //app.use('/api/rentals', rentals);
   app.use('/api/users/register', users);
   app.use('/api/users/login', auth);
   app.use('/api/uploadimage',uploadimage);
@@ -30,6 +27,8 @@ module.exports = function(app) {
   app.use('/api/getpost',getpost);
   app.use('/api/like',likepost);
   app.use('/api/dislike',dislikepost);
-  //app.use('/api/returns', returns);
+  app.use('/api/comment',commentspost);
+  app.use('/api/deletepost',deletepost);
+
   app.use(error);
 }

@@ -8,20 +8,34 @@ let CommentSchema = new mongoose.Schema({
       ref: "User",
     },
   ],
+  createAt: {
+    default: Date.now,
+    type: Date,
+  },
+
   replayTo: [
     {
       type: mongoose.Schema.Types.ObjectId,
       ref: "Comment",
     },
   ],
-
+  user: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: "Post",
+    required: true,
+  },
+  post:{
+    type: mongoose.Schema.Types.ObjectId,
+    ref: "User",
+    required: true,
+  },
   body: {
     type: String,
     minlength: 10,
     maxlength: 260,
   },
 
-  count: Number,
+
 });
 
 const Comments = mongoose.model("Comments", CommentSchema);
