@@ -7,6 +7,9 @@ const app = express();
 require("./start/cors")(app);
 require("./start/route")(app);
 require("./start/db")();
+require("./start/prod")(app);
+
+
 
 require("./start/validation")();
 

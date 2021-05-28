@@ -1,8 +1,5 @@
 const express = require('express');
-//const genres = require('../routes/genres');
-//const customers = require('../routes/customers');
-//const movies = require('../routes/movies');
-//const rentals = require('../routes/rentals');
+
 const users = require('../routes/users');
 const auth = require('../routes/auth');
 const uploadimage = require('../routes/uploadimage');
@@ -13,8 +10,6 @@ const dislikepost = require ('../routes/dislike');
 const deletepost = require('../routes/deletepost');
 const commentspost = require('../routes/comment');
 
-
-//const returns = require('../routes/returns');
 const error = require('../middleware/error');
 
 module.exports = function(app) {
