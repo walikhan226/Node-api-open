@@ -8,7 +8,7 @@ const { json } = require("express");
 const multer = require("multer");
 const object = require("joi/lib/types/object");
 const router = express.Router();
-
+var url = require('url') ;
 var storage = multer.diskStorage({
   destination: (req, file, cb) => {
 
@@ -43,7 +43,7 @@ const uploadImg = multer({ storage: storage }).single("file");
 
 router.post("/", uploadImg, async (req, res, next) => {
 
-
+  validate(req)
   console.log(req.body.id);
   try {
 
