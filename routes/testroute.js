@@ -1,5 +1,7 @@
 const object = require("joi/lib/types/object");
+const express = require("express");
 const router = express.Router();
+
 const { Posts, validate } = require("../models/posts");
 const auth = require("../middleware/auth");
 
