@@ -10,6 +10,8 @@ const dislikepost = require ('../routes/dislike');
 const deletepost = require('../routes/deletepost');
 const commentspost = require('../routes/comment');
 
+const testrout = require('../routes/testroute');
+
 const error = require('../middleware/error');
 
 module.exports = function(app) {
@@ -24,6 +26,7 @@ module.exports = function(app) {
   app.use('/api/dislike',dislikepost);
   app.use('/api/comment',commentspost);
   app.use('/api/deletepost',deletepost);
+  app.use('/api/testroute',testrout);
 
   app.use(error);
 }
