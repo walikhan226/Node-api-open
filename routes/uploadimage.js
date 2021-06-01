@@ -8,15 +8,15 @@ const { json } = require("express");
 const multer = require("multer");
 const object = require("joi/lib/types/object");
 const router = express.Router();
-var url = require('url') ;
-var storage = multer.diskStorage({
-  destination: (req, file, cb) => {
+var url = require("url");
 
+const storage = multer.diskStorage({
+  destination: async (req, file, cb) => {
     console.log(file);
     cb(null, "uploads/");
   },
-  filename: (req, file, cb) => {
-    console.log(file);
+
+  filename: function (req, file, cb) {
     var filetype = "";
     if (file.mimetype === "image/gif") {
       filetype = "gif";
@@ -31,45 +31,67 @@ var storage = multer.diskStorage({
   },
 });
 
-
-function validate(req) {
+function validateinfo(post) {
   const schema = {
-    image: Joi.string().min(5).max(255).required().email(),
+    id: Joi.objectId().required(),
+  };
+  return Joi.validate(post, schema);
+}
+
+const imageFilter = async function (req, file, cb) {
+  // Accept images only
+  if (!file.originalname.match(/\.(jpg|JPG|jpeg|JPEG|png|PNG|gif|GIF)$/)) {
+    req.fileValidationError = "Only image files are allowed!";
+    return cb(new Error("Only image files are allowed!"), false);
+  }
+
+  // console.log(file.path);
+  cb(null, true);
+};
+
+let upload = multer({ storage: storage, fileFilter: imageFilter }).single(
+  "file"
+);
+
+router.post("/", async (req, res) => {
+  var body = {
+    id: req.query.id,
   };
 
-  return Joi.validate(req, schema);
-}
-const uploadImg = multer({ storage: storage }).single("file");
+  const { error } = validateinfo(body);
 
-router.post("/", uploadImg, async (req, res, next) => {
-
-  validate(req)
-  console.log(req.body.id);
-  try {
-
-    if (!req.file) {
-      const error = new Error('Please choose files')
-      error.httpStatusCode = 400
-      
-      return next(error);
-  }
-    let user = await User.findById(req.body.id);
-
-    if (!user) return res.status(400).send("Invalid User");
-
-    console.log(user);
-    user.image = req.file.path;
-
-    const result = await user.save();
-    console.log(result);
-
+  if (error) {
     return res.status(200).json({
-      status: 1,
-      fileUrl:  req.file.path
+      status: 0,
+      message: error.message,
     });
-  } catch (e) {
-    return res.status(400).json({ status: 0, message: e.message });
   }
+
+  let user = await User.findById(req.query.id);
+  if (!user) {
+    return res.status(400).json({ status: 0, message: "User not exist" });
+  } else {
+    console.log(user);
+  }
+
+  upload(req, res, async function (err) {
+    if (req.fileValidationError) {
+      return res.status(400).send(req.fileValidationError);
+    } else if (!req.file) {
+      return res.status(400).send("Please select an image to upload");
+    } else if (err instanceof multer.MulterError) {
+      return res.status(400).send(err);
+    } else if (err) {
+      return res.status(400).send(err);
+    }
+
+    let image =
+      req.protocol + "://" + req.headers.host + "/uploads/" + req.file.filename;
+    user.image = image;
+
+    await user.save();
+    res.status(200).send(image);
+  });
 });
 
 module.exports = router;
