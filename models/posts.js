@@ -1,8 +1,7 @@
 const mongoose = require("mongoose");
 const Joi = require("joi");
-const User = require('../models/user');
+const User = require("../models/user");
 const { join } = require("lodash");
-
 
 const PostSchema = new mongoose.Schema({
   body: {
@@ -55,7 +54,7 @@ const PostSchema = new mongoose.Schema({
       default: [],
     },
   ],
-  
+
   likes: [
     {
       type: mongoose.Schema.Types.ObjectId,
@@ -73,15 +72,15 @@ const PostSchema = new mongoose.Schema({
 
   location: {
     type: {
-      type: String, 
-      enum: ['Point'], 
-      required: true
+      type: String,
+      enum: ["Point"],
+      required: true,
     },
     coordinates: {
       type: [Number],
-      required: true
-    }
-  }
+      required: true,
+    },
+  },
 });
 PostSchema.index({ location: "2dsphere" });
 const Posts = mongoose.model("Posts", PostSchema);
@@ -91,17 +90,13 @@ function validatePost(post) {
     body: Joi.string().min(10).max(160).required(),
     postType: Joi.string().min(2).max(20).required(),
     user: Joi.objectId().required(),
-    location:Joi.string().required(),
+
     latitude: Joi.string().required(),
-    longitude:Joi.string().required(),
-
-
+    longitude: Joi.string().required(),
   };
 
   return Joi.validate(post, schema);
 }
-
-
 
 exports.Posts = Posts;
 exports.validate = validatePost;

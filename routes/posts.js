@@ -11,13 +11,13 @@ const router = express.Router();
 const { Posts, validate } = require("../models/posts");
 const auth = require("../middleware/auth");
 
-var storage = multer.diskStorage({
-  destination: (req, file, cb) => {
-    console.log(file);
+const storage = multer.diskStorage({
+  destination: async (req, file, cb) => {
+  //  console.log(file);
     cb(null, "uploads/");
   },
-  filename: (req, file, cb) => {
-    console.log(file);
+
+  filename: function (req, file, cb) {
     var filetype = "";
     if (file.mimetype === "image/gif") {
       filetype = "gif";
@@ -32,39 +32,105 @@ var storage = multer.diskStorage({
   },
 });
 
-const uploadImg = multer({ storage: storage }).single("file");
+const imageFilter = async function (req, file, cb) {
+  // Accept images only
+  if (!file.originalname.match(/\.(jpg|JPG|jpeg|JPEG|png|PNG|gif|GIF)$/)) {
+    req.fileValidationError = "Only image files are allowed!";
+    return cb(new Error("Only image files are allowed!"), false);
+  }
 
-router.post("/", auth, uploadImg, async (req, res, next) => {
+  // console.log(file.path);
+  cb(null, true);
+};
+
+let upload = multer({ storage: storage, fileFilter: imageFilter }).single(
+  "file"
+);
+
+router.post("/", auth, async (req, res) => {
+  console.log(req.query.body);
   try {
-    const { error } = validate(req.body);
-    if (error) return res.status(400).send(error.details[0].message);
+    let data = {
+      user: req.query.user,
+      latitude: req.query.latitude,
+      longitude: req.query.longitude,
+      body: req.query.body,
+      postType: req.query.postType,
+    };
+    console.log(data);
+    const { error } = validate(data);
+    if (error)
+      return res.status(400).json({
+        status: 0,
 
-    if (!req.file) {
-      const error = new Error("Please choose files");
-      error.httpStatusCode = 400;
+        message: error.details[0].message,
+      });
 
-      console.log(error);
-      return next(error);
+    let user = await User.findById(data.user);
+
+    if (!user)
+      return res.status(400).json({
+        status: 0,
+
+        message: "Invalid user",
+      });
+    if (req.query.postType === "image") {
+      upload(req, res, async function (err) {
+        if (req.fileValidationError) {
+          return res.status(400).send(req.fileValidationError);
+        } else if (!req.file) {
+          return res.status(400).send("Please select an image to upload");
+        } else if (err instanceof multer.MulterError) {
+          return res.status(400).send(err);
+        } else if (err) {
+          return res.status(400).send(err);
+        }
+
+        let image =
+          req.protocol +
+          "://" +
+          req.headers.host +
+          "/uploads/" +
+          req.file.filename;
+        user.image = image;
+console.log(image);
+        let post = new Posts({
+          file: image,
+          user: req.query.user,
+          body: req.query.body,
+          postType: req.query.postType,
+          location: {
+            type: "Point",
+            coordinates: [
+              parseFloat(req.query.longitude),
+              parseFloat(req.query.latitude),
+            ],
+          },
+        });
+
+        post.image = image;
+        await post.save();
+
+        return res.status(200).send(post);
+      });
+      return;
     }
-    let user = await User.findById(req.body.user);
-    console.log(user);
-    if (!user) return res.status(400).send("Invalid User");
 
     let post = new Posts({
       file: req.file,
-      user: req.body.user,
-      body: req.body.body,
-      postType: req.body.postType,
+      user: req.query.user,
+      body: req.query.body,
+      postType: req.query.postType,
       location: {
         type: "Point",
         coordinates: [
-          parseFloat(req.body.longitude),
-          parseFloat(req.body.latitude),
+          parseFloat(req.query.longitude),
+          parseFloat(req.query.latitude),
         ],
       },
     });
 
-    post.image = req.file.path;
+    post.image = "";
     await post.save();
 
     res
@@ -74,26 +140,5 @@ router.post("/", auth, uploadImg, async (req, res, next) => {
     return res.status(400).json({ status: 0, message: e.message });
   }
 });
-
-router.post("/", auth, async (req, res) => {
-
-  let {error} = await validatedeletepost(req.body);
-
-  if (error) return res.status(400).json({ message: error.details[0].message });
-
-  try {
-    let post = Posts.deleteMany({ _id: req.body.postids });
-  } catch (e) {
-    return res.status(400).json({ message: e });
-  }
-});
-
-function validatedeletepost(post) {
-  const schema = {
-    postids: Joi.array().required(),
-  };
-
-  return Joi.validate(post, schema);
-}
 
 module.exports = router;
